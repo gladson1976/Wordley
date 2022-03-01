@@ -1,0 +1,84 @@
+.keyboard-container {
+	display: block;
+	border: 0px solid black;
+	width: 100%;
+	height: 100px;
+	padding:0px;
+	text-align: left;
+}
+.keyboard {
+	display: flex;
+    flex-direction: column;
+	border: 0px solid black;
+	width: 100%;
+	height: 100%;
+	padding:0px;
+	text-align: center;
+}
+.keyboard-row {
+	display: flex;
+	margin: auto;
+	margin-bottom: 1.5vw;
+	height: fit-content;
+	/* width: 94vw; */
+}
+.keyboard-keys {
+	display: flex;
+    justify-content: center;
+    align-items: center;
+	border: 1px solid #b3b6ba;
+	color: #555555;
+	background-color: #f1f1f1;
+	text-align: center;
+	vertical-align: middle;
+	border-radius: 1vw;
+	cursor: pointer;
+	width: 8vw;
+	height: 12vw;
+	font-size: large;
+	font-weight: bold;
+	margin: 0 0.25vw;
+}
+.space-key {
+	width: 60%;
+}
+.space-key-hidden {
+	width: 60%;
+	display: none;
+}
+.delete-key {
+	width: 12vw;
+}
+.delete-key:before {
+	content: '\e14a';
+}
+.enter-key {
+	width: 14vw;
+	font-size: x-large;
+}
+.enter-key:before {
+	content: '\e5ca';
+}
+.burger-key:before {
+	content: '\2630';
+}			
+.spacer-key-quarter {
+	width: 1.75%;
+	border: 0px;
+	background-color: transparent;
+}
+.spacer-key-half {
+	width: 3.5%;
+	border: 0px;
+	background-color: transparent;
+}
+.spacer-key-full {
+	width: 7%;
+	border: 0px;
+	background-color: transparent;
+}
+.disabled {
+	pointer-events: none;
+	cursor: not-allowed;
+	background-color: lightgrey;
+}
