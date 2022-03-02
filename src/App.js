@@ -312,10 +312,6 @@ function App() {
     setDialogHelpOpen(true);
   }, []);
 
-  // const showWordleyComplete = useCallback(() => {
-
-  // }, []);
-
   const renderWordleyHeader = useCallback(() => {
     return (
       <div className="wordley-title title-border">
@@ -476,16 +472,16 @@ function App() {
       ? currentWordley.currentTry
       : currentWordley.currentTry - 1;
     return (
-      <div className="settings">
+      <div className="settings praise-window" hidden={!dialogCompleteOpen}>
         <div className="modal-body">
         <table className="wordley-praise">
             <tbody>
               <tr>
-                <td className="title text-center">{arrPraises[praiseIndex]}</td>
+                <td className="title text-center praise-border">{arrPraises[praiseIndex]}</td>
               </tr>
               <tr>
                 <td className="text-right">
-                  <button type="button" className="btn btn-outline-success" onClick={(e) => newWordley(e)}>New Wordley</button>
+                  <button type="button" className="btn btn-outline-success praise-button" onClick={(e) => newWordley(e)}>New Wordley</button>
                 </td>
               </tr>
             </tbody>
@@ -493,7 +489,7 @@ function App() {
         </div>
       </div>
     );
-  }, [arrPraises, currentWordley.currentTry, newWordley]);
+  }, [arrPraises, currentWordley.currentTry, dialogCompleteOpen, newWordley]);
 
   const renderRevealWordley = useCallback(() => {
     return (
@@ -555,6 +551,7 @@ function App() {
       </div>
       {renderRevealWordley()}
       {renderKeyboard()}
+      {renderWordleyComplete()}
       <Dialog id="dialogSettings" onClose={handleDialogClose} open={dialogSettingsOpen}>
         {renderWordleySettings()}
       </Dialog>
@@ -564,9 +561,9 @@ function App() {
       <Dialog id="dialogHelp" onClose={handleDialogClose} open={dialogHelpOpen}>
         {renderWordleyHelp()}
       </Dialog>
-      <Dialog id="dialogWordleyComplete" onClose={handleDialogClose} open={dialogCompleteOpen}>
+      {/* <Dialog id="dialogWordleyComplete" onClose={handleDialogClose} open={dialogCompleteOpen}>
         {renderWordleyComplete()}
-      </Dialog>
+      </Dialog> */}
     </>
   );
 }
