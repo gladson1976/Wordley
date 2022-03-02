@@ -221,6 +221,34 @@ table.wordley-praise {
     color: #FFFFFF;
     animation: fadeInNo 1s;
 }
+.praise-window {
+	position: relative;
+    bottom: 12rem;
+    margin: auto;
+    background-color: #fefefe;
+    border: 1px solid grey;
+    border-radius: 4px;
+    animation: praise-grow 0.75s;
+}
+.praise-border {
+	border-bottom: 2px solid grey;
+    padding-bottom: 1rem;
+}
+.praise-button {
+	margin-top: 1rem;
+}
+
+@keyframes praise-grow {
+	from {
+		transform: scale(0);
+	}
+	50% {
+		transform: scale(1.25);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
 
 .list-unstyled {
 	margin-block-start: 0;
@@ -427,4 +455,9 @@ input[type="checkbox"].square:checked:after {
 
 input[type="checkbox"].square:checked:before {
 	background: #3498db;
+}
+
+@keyframes fadeIn {
+    from { background-color: transparent; }
+      to { background-color: #fefefe; }
 }
