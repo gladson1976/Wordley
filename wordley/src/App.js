@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import { Dialog } from '@mui/material';
 import _ from 'lodash';
 import './App.css';
+import './bootstrap.css';
 import './keyboard.css';
 import ShowWord from './showWord/showWord';
 import wordleyModel from './wordley.model';
@@ -20,6 +21,7 @@ function App() {
   const [dialogSettingsOpen, setDialogSettingsOpen] = useState(false);
   const [dialogStatsOpen, setDialogStatsOpen] = useState(false);
   const [dialogHelpOpen, setDialogHelpOpen] = useState(false);
+  const [dialogCompleteOpen, setDialogCompleteOpen] = useState(false);
 
   const arrKeys = useMemo(() => [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -27,6 +29,8 @@ function App() {
     ["*BKSPC", "Z", "X", "C", "V", "B", "N", "M", "*ENTER"],
     // ["#H", "#H", "#H", "#H", "*SPACE", "#H", "#H"]
   ], []);
+
+  const arrPraises = useMemo(() => ['Genius', 'Magnificent', 'Impressive', 'Splendid', 'Great', 'Phew', 'Ouch!'], []);
 
   const indices = useCallback((c, s) => {
     return s
@@ -122,6 +126,7 @@ function App() {
     // _.set(tempWordley, 'wordley', 'NERVE'); // DEBUG
     setCurrentWordley(tempWordley);
     setIsWordleyComplete(false);
+    setDialogCompleteOpen(false);
     setRevealWordley(false);
   }, [currentWordley, getRandom, wordleyWords]);
 
@@ -139,6 +144,7 @@ function App() {
     let currentWord = _.get(tempWordley, `wordleyBoard[${currentTry}].wordley`, '');
     currentWord = currentWord.slice(0, currentWord.length - 1);
     _.set(tempWordley, `wordleyBoard[${currentTry}].wordley`, currentWord);
+    _.set(tempWordley, `wordleyBoard[${currentTry}].validations`, [0, 0, 0, 0, 0]);
     setCurrentWordley(tempWordley);
   }, [currentWordley]);
 
@@ -197,11 +203,13 @@ function App() {
       if (currentStreak > maxStreak) {
         _.set(tempWordley, 'gameStats.maxStreak', currentStreak);
       }
+      setDialogCompleteOpen(true);
     } else if (currentTry === 5 && !wordleyComplete) {
       const guessDistribution = _.get(tempWordley, `gameStats.guessDistribution[6]`, 0) + 1;
       _.set(tempWordley, 'gameStats.guessDistribution[6]', guessDistribution);
       _.set(tempWordley, 'gameStats.currentStreak', 0);
       goRevealWordley();
+      setDialogCompleteOpen(true);
     }
 
     setCurrentWordley(tempWordley);
@@ -274,6 +282,7 @@ function App() {
     setDialogSettingsOpen(false);
     setDialogStatsOpen(false);
     setDialogHelpOpen(false);
+    setDialogCompleteOpen(false);
   }, []);
 
   const setOptionDuplicates = useCallback((e) => {
@@ -287,7 +296,7 @@ function App() {
   const resetStats = useCallback(() => {
     const newWordley = wordleyModel;
     const tempWordley = _.cloneDeep(currentWordley);
-    _.set(tempWordley, newWordley.gameStats);
+    tempWordley.gameStats = {...newWordley.gameStats};
     setCurrentWordley(tempWordley);
   }, [currentWordley]);
 
@@ -302,6 +311,10 @@ function App() {
   const showHelp = useCallback(() => {
     setDialogHelpOpen(true);
   }, []);
+
+  // const showWordleyComplete = useCallback(() => {
+
+  // }, []);
 
   const renderWordleyHeader = useCallback(() => {
     return (
@@ -355,10 +368,10 @@ function App() {
       if (index !== 6) {
         const barHeight = totalPlayed === 0
           ? 0
-          : value / totalPlayed * 12;
+          : value / totalPlayed * 5;
         return (
           <div key={`barContainer${index}`}>
-            <div className="bar-chart" key={`barChart${index}`} style={{height: `${barHeight}vh`}}>{value}</div>
+            <div className="bar-chart" key={`barChart${index}`} style={{height: `${barHeight}rem`}}>{value}</div>
             <div className="bar-text" key={`barText${index}`}>{index + 1}</div>
           </div>
         );
@@ -458,6 +471,30 @@ function App() {
     );
   }, []);
 
+  const renderWordleyComplete = useCallback(() => {
+    const praiseIndex = currentWordley.currentTry === 6
+      ? currentWordley.currentTry
+      : currentWordley.currentTry - 1;
+    return (
+      <div className="settings">
+        <div className="modal-body">
+        <table className="wordley-praise">
+            <tbody>
+              <tr>
+                <td className="title text-center">{arrPraises[praiseIndex]}</td>
+              </tr>
+              <tr>
+                <td className="text-right">
+                  <button type="button" className="btn btn-outline-success" onClick={(e) => newWordley(e)}>New Wordley</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }, [arrPraises, currentWordley.currentTry, newWordley]);
+
   const renderRevealWordley = useCallback(() => {
     return (
       <div className={classNames('reveal-wordley', {'hidden': !revealWordley})}>
@@ -526,6 +563,9 @@ function App() {
       </Dialog>
       <Dialog id="dialogHelp" onClose={handleDialogClose} open={dialogHelpOpen}>
         {renderWordleyHelp()}
+      </Dialog>
+      <Dialog id="dialogWordleyComplete" onClose={handleDialogClose} open={dialogCompleteOpen}>
+        {renderWordleyComplete()}
       </Dialog>
     </>
   );

@@ -2,23 +2,24 @@
 	display: block;
 	border: 0px solid black;
 	width: 100%;
-	height: 100px;
-	padding:0px;
+	height: fit-content;
+	padding: 0px;
 	text-align: left;
+	padding-bottom: 1rem;
 }
 .keyboard {
 	display: flex;
     flex-direction: column;
 	border: 0px solid black;
 	width: 100%;
-	height: 100%;
-	padding:0px;
+	height: fit-content;
+	padding: 0px;
 	text-align: center;
 }
 .keyboard-row {
 	display: flex;
 	margin: auto;
-	margin-bottom: 1.5vw;
+	margin-bottom: 0.25rem;
 	height: fit-content;
 	/* width: 94vw; */
 }
@@ -31,13 +32,13 @@
 	background-color: #f1f1f1;
 	text-align: center;
 	vertical-align: middle;
-	border-radius: 1vw;
+	border-radius: 0.25rem;
 	cursor: pointer;
-	width: 8vw;
-	height: 12vw;
-	font-size: large;
+	width: 1.875rem;
+	height: 2.5rem;
+	font-size: 1.125rem;
 	font-weight: bold;
-	margin: 0 0.25vw;
+	margin: 0 1px;
 }
 .space-key {
 	width: 60%;
@@ -47,14 +48,14 @@
 	display: none;
 }
 .delete-key {
-	width: 12vw;
+	width: 2.75rem;
 }
 .delete-key:before {
 	content: '\e14a';
 }
 .enter-key {
-	width: 14vw;
-	font-size: x-large;
+	width: 3.125rem;
+	font-size: 1.5rem;
 }
 .enter-key:before {
 	content: '\e5ca';

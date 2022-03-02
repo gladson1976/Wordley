@@ -7,11 +7,19 @@
 		url(MaterialIcons-Regular.ttf) format('truetype');
 }
 
+html {
+	font-size: 4vmin;
+}
+
+.MuiPaper-root {
+	max-width: 100% !important;
+}
+
 .material-icons {
 	font-family: 'Material Icons';
 	font-weight: normal;
 	font-style: normal;
-	font-size: 24px;
+	font-size: 1.5rem;
 	/* Preferred icon size */
 	display: inline-flex;
 	line-height: 1;
@@ -33,7 +41,7 @@
 .wordley-container {
 	display: flex;
 	flex-direction: column;
-	margin: 8vw auto 4vw auto;
+	margin: 1.5rem auto 1rem auto;
 	/* margin-bottom: 20vw; */
 	align-items: center;
 }
@@ -46,13 +54,13 @@
 	display: flex;
 	align-items: center;
 	flex-direction: column;
-	margin-bottom: 6vw;
+	margin-bottom: 0.5rem;
 }
 
 .icon {
-	font-size: 30px;
-	margin-right: 4px;
-	margin-top: 4px;
+	font-size: 2rem;
+	margin-right: 0.25rem;
+	margin-top: 0.25rem;
 }
 
 .icon-replay:before {
@@ -71,16 +79,6 @@
 	content: '\e8fd';
 }
 
-@keyframes App-logo-spin {
-	from {
-		transform: rotate(0deg);
-	}
-
-	to {
-		transform: rotate(360deg);
-	}
-}
-
 .text-right {
 	text-align: right;
 }
@@ -93,13 +91,13 @@ table {
 div.wordley-title {
 	display: flex;
 	align-items: center;
-	margin: 0px 2vw;
-	width: 96vw;
-	height: 8vh;
+	margin: 0px 0.5rem;
+	width: auto;
+	height: 3.5rem;
 }
 
 div.title-border {
-	border-bottom: .5vh solid rgb(85, 98, 112);
+	border-bottom: .25rem solid rgb(85, 98, 112);
 }
 
 table.wordley-title {
@@ -108,23 +106,23 @@ table.wordley-title {
 }
 
 td.title {
-	font-size: x-large;
+	font-size: 1.5rem;
 	font-weight: bold;
 }
 
 table.wordley-title td.wordley-image {
-	width: 24vw;
-	height: 24vw;
+	width: 3rem;
+	height: 3rem;
 	background-repeat: no-repeat;
 	background-size: cover
 }
 
 div.wordley-footer {
 	vertical-align: bottom;
-	margin: 0px 2vw;
-	width: 96vw;
-	height: 30vh;
-	margin-top: 4vh;
+	margin: 0px 0.5rem;
+	width: auto;
+	height: 2.5rem;
+	margin-top: 0.5rem;
 }
 
 table.wordley-footer {
@@ -132,9 +130,13 @@ table.wordley-footer {
 	border: 1px solid rgb(85, 98, 112);
 }
 
+table.wordley-praise {
+	width: 100%;
+}
+
 .settings {
-	padding: 4vw;
-	width: 70vw;
+	padding: 0.75rem;
+	width: 16rem;
 }
 
 .close {
@@ -146,7 +148,7 @@ table.wordley-footer {
 }
 
 .settings-table td {
-	padding-top: 1vh;
+	padding-top: 0.5rem;
 }
 
 .settings-table td.settings-title {
@@ -161,13 +163,13 @@ table.wordley-footer {
 }
 
 .stats-chart {
-	height: 18vh;
+	height: 8rem;
 }
 
 .chart-container {
 	border: 1px solid grey;
     height: inherit;
-	padding: 1vh 1vw;
+	padding: 0.5rem 0.25rem;
 	display: flex;
 	align-items: flex-end;
 	justify-content: center;
@@ -175,19 +177,19 @@ table.wordley-footer {
 
 .bar-chart {
 	display: inline-flex;
-    width: 9vw;
-    margin: 1vw;
+    width: 2rem;
+    margin: 0.25rem;
     background-color: #6AAA64;
     justify-content: center;
     align-items: flex-end;
-    padding: 0.5vh 0px;
+    padding: 0.25rem 0px;
 	font-weight: bold;
 }
 
 .bar-text {
 	display: inline-flex;
-    width: 9vw;
-    margin: 1vw;
+    width: 2rem;
+    margin: 0.25rem;
     justify-content: center;
     align-items: flex-end;
 	font-weight: bold;
@@ -198,11 +200,11 @@ table.wordley-footer {
     color: #555555;
     justify-content: center;
     align-items: center;
-    width: 6vw;
-    height: 6vw;
+    width: 1.5rem;
+    height: 1.5rem;
     border: 1px solid #d3d6da;
     font-weight: bold;
-    font-size: small;
+    font-size: 0.75rem;
 }
 .wordley-help-correct {
     background-color: #6AAA64;
@@ -236,14 +238,14 @@ table.wordley-footer {
 }
 
 .modal-header {
-	padding: 5px;
-	padding-bottom: 10px;
+	padding: 0.25rem;
+	padding-bottom: 0.5rem;
 	border-bottom: 2px solid #555555;
-	margin-bottom: 2vw;
+	margin-bottom: 0.5rem;
 }
 
 .modal-title {
-	margin: 0px 10px;
+	margin: 0px 0.5rem;
 	font-weight: bold;
 }
 
@@ -256,7 +258,7 @@ table.wordley-footer {
 }
 
 .font-small {
-	font-size: small;
+	font-size: 0.75rem;
 }
 
 .text-right {
@@ -272,7 +274,7 @@ table.wordley-footer {
 }
 
 .font-larger {
-	font-size: large;
+	font-size: 1.125rem;
 }
 
 .btn {
@@ -362,8 +364,8 @@ fieldset[disabled] a.btn {
 /* CHECKBOX */
 input[type="checkbox"] {
 	position: relative;
-	width: 40px;
-	height: 20px;
+	width: 2.5rem;
+	height: 1.25rem;
 	visibility: hidden;
 }
 
@@ -372,22 +374,22 @@ input[type="checkbox"]:before {
 	position: absolute;
 	display: block;
 	width: 100%;
-	height: 20px;
-	top: 2px;
+	height: 1.25rem;
+	top: 0.125rem;
 	background: #fff;
 	content: '';
-	border-radius: 10px;
+	border-radius: 0.75rem;
 	border: solid 1px darkgray;
 	transition: all .5s;
 }
 
 input[type="checkbox"]:after {
 	visibility: visible;
-	top: 2px;
+	top: 0.125rem;
 	display: block;
 	content: '';
-	width: 20px;
-	height: 20px;
+	width: 1.25rem;
+	height: 1.25rem;
 	background: #fff;
 	position: absolute;
 	border-radius: 50%;
@@ -398,7 +400,7 @@ input[type="checkbox"]:after {
 
 input[type="checkbox"]:checked:after {
 	left: 100%;
-	margin-left: -20px;
+	margin-left: -1.25rem;
 }
 
 input[type="checkbox"]:checked:before {
@@ -406,21 +408,21 @@ input[type="checkbox"]:checked:before {
 }
 
 input[type="checkbox"].square {
-	width: 60px;
+	width: 3.75rem;
 }
 
 input[type="checkbox"].square:before {
-	border-radius: 2px;
+	border-radius: 0.125rem;
 }
 
 input[type="checkbox"].square:after {
-	border-radius: 2px;
-	width: 30px;
+	border-radius: 0.125rem;
+	width: 2rem;
 }
 
 input[type="checkbox"].square:checked:after {
 	left: 100%;
-	margin-left: -30px;
+	margin-left: -2rem;
 }
 
 input[type="checkbox"].square:checked:before {
