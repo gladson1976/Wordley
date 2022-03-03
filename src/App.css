@@ -41,7 +41,7 @@ html {
 .wordley-container {
 	display: flex;
 	flex-direction: column;
-	margin: 1.5rem auto 1rem auto;
+	margin: 1.5rem auto 0 auto;
 	/* margin-bottom: 20vw; */
 	align-items: center;
 }
@@ -51,16 +51,18 @@ html {
 }
  
 .reveal-wordley {
+    position: relative;
 	display: flex;
 	align-items: center;
 	flex-direction: column;
+	top: 0.5rem;
 	margin-bottom: 0.5rem;
 }
 
 .icon {
 	font-size: 2rem;
-	margin-right: 0.25rem;
-	margin-top: 0.25rem;
+	margin-right: 0.5rem;
+	margin-top: 0.5rem;
 }
 
 .icon-replay:before {
@@ -221,29 +223,30 @@ table.wordley-praise {
     color: #FFFFFF;
     animation: fadeInNo 1s;
 }
+.reveal-container {
+	height: 5rem;
+}
 .praise-window {
-	position: relative;
-    bottom: 12rem;
     margin: auto;
     background-color: #fefefe;
-    border: 1px solid grey;
-    border-radius: 4px;
     animation: praise-grow 0.75s;
 }
 .praise-border {
-	border-bottom: 2px solid grey;
-    padding-bottom: 1rem;
+	width: 50%;
 }
 .praise-button {
-	margin-top: 1rem;
+	margin: 1rem;
 }
 
 @keyframes praise-grow {
 	from {
 		transform: scale(0);
 	}
-	50% {
-		transform: scale(1.25);
+	33% {
+		transform: scale(1);
+	}
+	66% {
+		transform: scale(0.75);
 	}
 	100% {
 		transform: scale(1);
@@ -278,7 +281,7 @@ table.wordley-praise {
 }
 
 .hidden {
-	visibility: hidden;
+	display: none;
 }
 
 .font-bold {

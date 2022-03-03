@@ -7,7 +7,8 @@ import './bootstrap.css';
 import './keyboard.css';
 import ShowWord from './showWord/showWord';
 import wordleyModel from './wordley.model';
-import wordleyWordsRepeats from './wordley-repeats';
+// import wordleyWordsRepeats from './wordley-repeats';
+import wordleWordsOriginals from './wordle-original';
 
 function App() {
   const [allowDuplicates, setAllowDuplicates] = useState(true);
@@ -50,7 +51,7 @@ function App() {
   }, []);
 
   const filterDuplicates = useCallback(() => {
-    return _.compact(wordleyWordsRepeats.map((word) => {
+    return _.compact(wordleWordsOriginals.map((word) => {
       if (!hasDuplicates(word)) {
         return word;
       }
@@ -59,13 +60,6 @@ function App() {
   }, [hasDuplicates]);
 
   // ----------------------------
-
-  // const renderDefineWordley = useCallback(() => {
-  //   if (isWordleyComplete) {
-  //     return <a href={`https://www.google.com/search?q=define+${currentWordley.wordley}`} rel="noreferrer" target='_blank'>Define {currentWordley.wordley}</a>
-  //   }
-  //   return;
-  // }, [currentWordley.wordley, isWordleyComplete]);
 
   const savePersistData = useCallback(() => {
     let tempWordley = _.cloneDeep(currentWordley);
@@ -96,20 +90,14 @@ function App() {
       : false;
     setIsWordleyComplete(wordleyComplete);
 
-    // if (persistData.wordley === '') {
-    //   const newWordNumber = getRandom(0, wordleyWords.length)
-    //   const newWord = wordleyWords[newWordNumber];
-    //   _.set(persistData, 'wordley', newWord); 
-    // }
-
     setCurrentWordley(persistData);
     setAllowDuplicates(tempAllowDuplicates);
   }, []);
 
   const collectWordleys = useCallback(() => {
     const tempWordleyWords = allowDuplicates
-      ? [...wordleyWordsRepeats]
-      : [...filterDuplicates(wordleyWordsRepeats)];
+      ? [...wordleWordsOriginals]
+      : [...filterDuplicates(wordleWordsOriginals)];
     setWordleyWords(tempWordleyWords);
   }, [allowDuplicates, filterDuplicates]);
 
@@ -118,7 +106,6 @@ function App() {
     const tempWordley = _.cloneDeep(currentWordley);
     const newWordNumber = getRandom(0, wordleyWords.length)
     const newWord = wordleyWords[newWordNumber];
-    // console.log(newWordNumber, wordleyWords.length, newWord);
     _.set(tempWordley, 'wordley', newWord);
     _.set(tempWordley, 'currentTry', 0);
     _.set(tempWordley, 'wordleyBoard', newWordley.wordleyBoard);
@@ -161,7 +148,6 @@ function App() {
     if (tempWordley.wordley === '') {
       const newWordNumber = getRandom(0, wordleyWords.length)
       const newWord = wordleyWords[newWordNumber];
-      // console.log(newWordNumber, wordleyWords.length, newWord);
       _.set(tempWordley, 'wordley', newWord);
     }
     const selectedWord = tempWordley.wordley;
@@ -209,7 +195,6 @@ function App() {
       _.set(tempWordley, 'gameStats.guessDistribution[6]', guessDistribution);
       _.set(tempWordley, 'gameStats.currentStreak', 0);
       goRevealWordley();
-      setDialogCompleteOpen(true);
     }
 
     setCurrentWordley(tempWordley);
@@ -288,8 +273,8 @@ function App() {
   const setOptionDuplicates = useCallback((e) => {
     setAllowDuplicates(e.target.checked);
     const tempWordleyWords = !allowDuplicates
-      ? [...wordleyWordsRepeats]
-      : [...filterDuplicates(wordleyWordsRepeats)];
+      ? [...wordleWordsOriginals]
+      : [...filterDuplicates(wordleWordsOriginals)];
     setWordleyWords(tempWordleyWords);
   }, [allowDuplicates, filterDuplicates]);
 
@@ -467,37 +452,30 @@ function App() {
     );
   }, []);
 
-  const renderWordleyComplete = useCallback(() => {
+  const renderRevealWordley = useCallback(() => {
     const praiseIndex = currentWordley.currentTry === 6
       ? currentWordley.currentTry
       : currentWordley.currentTry - 1;
     return (
-      <div className="settings praise-window" hidden={!dialogCompleteOpen}>
-        <div className="modal-body">
-        <table className="wordley-praise">
-            <tbody>
-              <tr>
-                <td className="title text-center praise-border">{arrPraises[praiseIndex]}</td>
-              </tr>
-              <tr>
-                <td className="text-right">
-                  <button type="button" className="btn btn-outline-success praise-button" onClick={(e) => newWordley(e)}>New Wordley</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div className='reveal-container'>
+      <div className={classNames('praise-window', {'hidden': !dialogCompleteOpen})}>
+        <table className='wordley-praise'>
+          <tbody>
+            <tr>
+              <td className='title text-center praise-border'>{arrPraises[praiseIndex]}</td>
+              <td className='text-center'>
+                <button type='button' className='btn btn-outline-success praise-button' onClick={(e) => newWordley(e)}>New Wordley</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    );
-  }, [arrPraises, currentWordley.currentTry, dialogCompleteOpen, newWordley]);
-
-  const renderRevealWordley = useCallback(() => {
-    return (
       <div className={classNames('reveal-wordley', {'hidden': !revealWordley})}>
-        <ShowWord key="revealWordley" wordley={currentWordley.wordley} validations={[1, 1, 1, 1, 1]} />
+        <ShowWord key='revealWordley' wordley={currentWordley.wordley} validations={[1, 1, 1, 1, 1]} />
+      </div>
       </div>
     )
-  }, [currentWordley.wordley, revealWordley]);
+  }, [arrPraises, currentWordley.currentTry, currentWordley.wordley, dialogCompleteOpen, newWordley, revealWordley]);
 
   const renderKeyboard = useCallback(() => {
     return (
@@ -551,7 +529,6 @@ function App() {
       </div>
       {renderRevealWordley()}
       {renderKeyboard()}
-      {renderWordleyComplete()}
       <Dialog id="dialogSettings" onClose={handleDialogClose} open={dialogSettingsOpen}>
         {renderWordleySettings()}
       </Dialog>
@@ -561,9 +538,6 @@ function App() {
       <Dialog id="dialogHelp" onClose={handleDialogClose} open={dialogHelpOpen}>
         {renderWordleyHelp()}
       </Dialog>
-      {/* <Dialog id="dialogWordleyComplete" onClose={handleDialogClose} open={dialogCompleteOpen}>
-        {renderWordleyComplete()}
-      </Dialog> */}
     </>
   );
 }
