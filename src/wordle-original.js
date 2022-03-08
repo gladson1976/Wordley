@@ -2307,8 +2307,11 @@ const wordleOriginals = [
 	'ROWER',
 	'ARTSY',
 	'RURAL',
-	'SHAVE'],
-	OA=['AAHED',
+	'SHAVE'
+];
+
+const wordleOriginalsValid = [
+	'AAHED',
 	'AALII',
 	'AARGH',
 	'AARTI',
@@ -12948,4 +12951,4 @@ const wordleOriginals = [
 	'ZYMIC'
 ];
 
-export default wordleOriginals;
+export { wordleOriginals, wordleOriginalsValid };

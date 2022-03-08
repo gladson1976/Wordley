@@ -5,10 +5,10 @@ import classNames from 'classnames'
 import './showWord.css'
 
 function ShowWord(props) {
-    const { wordley, validations } = props;
-    const padWordley = (word, padLength = 5, padChar = ' ') => {
+    const { wordley = '', validations = [] } = props;
+    const padWordley = useCallback((word, padLength = 5, padChar = ' ') => {
         return _.padEnd(word, padLength, padChar);
-    };
+    }, []);
 
     // const showDefinition = useCallback(() => {
     //     if (_.trim(wordley).length === 5) {
@@ -30,12 +30,13 @@ function ShowWord(props) {
         if (validations.length === 0) {
             _.fill(validations, 0, 0, 5);
         }
-        return <div key={`wordley${index}`} className={classNames("wordley-bit", {
-            "wordley-clear": validations[index] === 0,
-            "wordley-correct": validations[index] === 1,
-            "wordley-maybe": validations[index] === 2,
-            "wordley-no": validations[index] === 3,
-            "wordley-error": validations[index] === 4
+        return <div key={`wordley${index}`} className={classNames('wordley-bit', {
+            'wordley-clear': validations[index] === 0,
+            'wordley-correct': validations[index] === 1,
+            'wordley-maybe': validations[index] === 2,
+            'wordley-no': validations[index] === 3,
+            'wordley-error': validations[index] === 4,
+            'earthquake': validations[index] === 4
         })}>{letter}</div>
     }, [validations]);
 
@@ -47,7 +48,7 @@ function ShowWord(props) {
     }, [showLetter, wordley]);
 
     return (
-        <div className="wordley-word">
+        <div className='wordley-word'>
             {showWord()}
             {/* {showDefinition()} */}
         </div>
@@ -55,8 +56,8 @@ function ShowWord(props) {
 };
 
 ShowWord.propTypes = {
-    wordley: PropTypes.string.isRequired,
-    validations: PropTypes.array.isRequired
+    wordley: PropTypes.string,
+    validations: PropTypes.array
 };
 
 export default ShowWord;

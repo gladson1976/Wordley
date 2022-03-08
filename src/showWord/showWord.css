@@ -19,16 +19,19 @@
 .wordley-correct {
     background-color: #6AAA64;
     color: #FFFFFF;
+    animation-timing-function: ease-in;
     animation: fadeInCorrect 1s;
 }
 .wordley-maybe {
     background-color: #C9B458;
     color: #FFFFFF;
+    animation-timing-function: ease-in;
     animation: fadeInMaybe 1s;
 }
 .wordley-no {
     background-color: #989C9E;
     color: #FFFFFF;
+    animation-timing-function: ease-in;
     animation: fadeInNo 1s;
 }
 .wordley-clear {
@@ -61,18 +64,72 @@
 .define-word-empty:before {
 	content: '\f02f'; 
 }
+.earthquake {
+	animation: Shake 1s;
+}
 
 @keyframes fadeInCorrect {
-    from { background-color: transparent; }
-      to { background-color: #6AAA64; }
+    from {
+        background-color: transparent;
+        transform: rotateY(-90deg);
+    }
+    to {
+        background-color: #6AAA64;
+        transform: rotateY(0deg);
+    }
 }
 
 @keyframes fadeInMaybe {
-    from { background-color: transparent; }
-      to { background-color: #C9B458; }
+    from {
+        background-color: transparent;
+        transform: rotateY(-90deg);
+    }
+    to {
+        background-color: #C9B458;
+        transform: rotateY(0deg);
+    }
 }
 
 @keyframes fadeInNo {
-    from { background-color: transparent; }
-      to { background-color: #989C9E; }
+    from {
+        background-color: transparent;
+        transform: rotateY(-90deg);
+    }
+    to {
+        background-color: #989C9E;
+        transform: rotateY(0deg);
+    }
 }
+
+@keyframes Shake {
+	10%, 90% {
+		transform: translateX(-1px);
+	}
+	20%, 80% {
+		transform: translateX(2px);
+	}
+	30%, 50%, 70% {
+		transform: translateX(-4px);
+	}
+	40%, 60% {
+		transform: translateX(4px);
+	}
+}
+
+@keyframes rotate-div {
+    0% {
+        transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+        -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+    }
+    50% {
+        transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+        -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+    }
+    100% {
+        transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+        -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+        background-color: #ec407a;
+    }
+}
+    
+    

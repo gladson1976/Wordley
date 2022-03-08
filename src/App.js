@@ -7,13 +7,13 @@ import './bootstrap.css';
 import './keyboard.css';
 import ShowWord from './showWord/showWord';
 import wordleyModel from './wordley.model';
-// import wordleyWordsRepeats from './wordley-repeats';
-import wordleWordsOriginals from './wordle-original';
+import { wordleOriginals, wordleOriginalsValid } from './wordle-original';
 
 function App() {
   const [allowDuplicates, setAllowDuplicates] = useState(true);
   const [currentWordley, setCurrentWordley] = useState(wordleyModel);
   const [wordleyWords, setWordleyWords] = useState([]);
+  const [wordleyWordsValid, setWordleyWordsValid] = useState(wordleOriginalsValid);
   const [isWordleyComplete, setIsWordleyComplete] = useState(false);
   const [revealWordley, setRevealWordley] = useState(false);
   const appTitle = "Wordley";
@@ -51,7 +51,7 @@ function App() {
   }, []);
 
   const filterDuplicates = useCallback(() => {
-    return _.compact(wordleWordsOriginals.map((word) => {
+    return _.compact(wordleOriginals.map((word) => {
       if (!hasDuplicates(word)) {
         return word;
       }
@@ -60,6 +60,10 @@ function App() {
   }, [hasDuplicates]);
 
   // ----------------------------
+
+  const goRevealWordley = useCallback(() => {
+    setRevealWordley(true);
+  }, []);
 
   const savePersistData = useCallback(() => {
     let tempWordley = _.cloneDeep(currentWordley);
@@ -89,15 +93,17 @@ function App() {
       ? wordleyValidation.reduce((valid, num) => valid && (num === 1), true) || persistData.currentTry > 5
       : false;
     setIsWordleyComplete(wordleyComplete);
-
     setCurrentWordley(persistData);
     setAllowDuplicates(tempAllowDuplicates);
-  }, []);
+    if (currentTry === 5 && wordleyComplete) {
+      goRevealWordley();
+    }
+  }, [goRevealWordley]);
 
   const collectWordleys = useCallback(() => {
     const tempWordleyWords = allowDuplicates
-      ? [...wordleWordsOriginals]
-      : [...filterDuplicates(wordleWordsOriginals)];
+      ? [...wordleOriginals]
+      : [...filterDuplicates(wordleOriginals)];
     setWordleyWords(tempWordleyWords);
   }, [allowDuplicates, filterDuplicates]);
 
@@ -136,11 +142,58 @@ function App() {
   }, [currentWordley]);
 
   const isValidWord = useCallback((word) => {
-    return wordleyWords.includes(word);
-  }, [wordleyWords]);
+    return wordleyWords.includes(word) || wordleyWordsValid.includes(word);
+  }, [wordleyWords, wordleyWordsValid]);
 
-  const goRevealWordley = useCallback(() => {
-    setRevealWordley(true);
+  const doValidate = useCallback((guess, solution, tempWordley) => {
+    let { usedLetters } = tempWordley;
+    const guessedLetters = guess
+      .split('')
+      .map(letter => ({letter, state: 3}));
+    const solutionLetters = solution
+      .split('')
+      .map(letter => ({letter, includedInGuess: false}));
+    
+    for (let i = 0; i < guessedLetters.length; i+=1) {
+      if (guessedLetters[i].letter === solutionLetters[i].letter) {
+        guessedLetters[i].state = 1;
+        solutionLetters[i].includedInGuess = true;
+        usedLetters.correct.push(guessedLetters[i].letter);
+        _.pull(usedLetters.maybe, guessedLetters[i].letter);
+      }
+    }
+
+    for (let i = 0; i < guessedLetters.length; i++) {
+      if (guessedLetters[i].state === 1) {
+        continue;
+      }
+  
+      const letterFoundElsewhere = solutionLetters
+        .find((solutionLetter) => {
+          const matchesLetter = solutionLetter.letter === guessedLetters[i].letter;
+          return matchesLetter && !solutionLetter.includedInGuess;
+        });
+  
+      if (letterFoundElsewhere) {
+        guessedLetters[i].state = 2;
+        usedLetters.maybe.push(guessedLetters[i].letter);
+        _.pull(usedLetters.correct, guessedLetters[i].letter);
+        letterFoundElsewhere.includedInGuess = true;
+      } else {
+        if (!(usedLetters.correct.includes(guessedLetters[i].letter) || usedLetters.maybe.includes(guessedLetters[i].letter))) {
+          usedLetters.no.push(guessedLetters[i].letter);
+        }
+      }
+    }
+  
+    const currentValidation = guessedLetters.map(guessedLetter => {
+      return guessedLetter.state;
+    });
+
+    return {
+      currentValidation: currentValidation,
+      usedLetters: usedLetters
+    };
   }, []);
 
   const validateWordley = useCallback(() => {
@@ -155,30 +208,24 @@ function App() {
     let wordleyComplete = true;
     let currentWord = _.get(tempWordley, `wordleyBoard[${currentTry}].wordley`, '');
     let currentValidation = [3, 3, 3, 3, 3];
+    let usedLetters = {};
     if(!isValidWord(currentWord)) {
       currentValidation = [4, 4, 4, 4, 4];
       _.set(tempWordley, `wordleyBoard[${currentTry}].validations`, currentValidation);
       setCurrentWordley(tempWordley);
       return;
     }
-    for (let i = 0; i < currentWord.length; i += 1) {
-      const letterIndex = indices(currentWord[i], selectedWord);
-      if (letterIndex.includes(i)) {
-        currentValidation[i] = 1;
-        tempWordley.usedLetters.correct.push(currentWord[i]);
-        _.pull(tempWordley.usedLetters.maybe, currentWord[i]);
-      } else if (!letterIndex.includes(i) && letterIndex.length > 0 && selectedWord[i] !== currentWord[i]) {
-        currentValidation[i] = 2;
-        wordleyComplete &= false;
-        tempWordley.usedLetters.maybe.push(currentWord[i]);
-        _.pull(tempWordley.usedLetters.correct, currentWord[i]);
-      } else {
-        wordleyComplete &= false;
-        tempWordley.usedLetters.no.push(currentWord[i]);
-      }
-    }
+    const tempValidation = doValidate(currentWord, selectedWord, tempWordley);
+    currentValidation = tempValidation.currentValidation;
+    usedLetters = tempValidation.usedLetters;
+    wordleyComplete = _.reduce(currentValidation.map((v, i) => {
+      return wordleyComplete && v === 1
+    }), (valid, val) => {
+        return valid && val;
+    }, true);
     setIsWordleyComplete(wordleyComplete);
     _.set(tempWordley, `wordleyBoard[${currentTry}].validations`, currentValidation);
+    _.set(tempWordley, 'usedLetters', usedLetters);
     _.set(tempWordley, 'currentTry', currentTry + 1);
     if (wordleyComplete) {
       const guessDistribution = _.get(tempWordley, `gameStats.guessDistribution[${currentTry}]`, 0) + 1;
@@ -198,7 +245,7 @@ function App() {
     }
 
     setCurrentWordley(tempWordley);
-  }, [currentWordley, isValidWord, getRandom, wordleyWords, indices, goRevealWordley]);
+  }, [currentWordley, isValidWord, doValidate, getRandom, wordleyWords, goRevealWordley]);
 
   const goWordley = useCallback((keyLetter) => {
     let tempWordley = _.cloneDeep(currentWordley);
@@ -273,8 +320,8 @@ function App() {
   const setOptionDuplicates = useCallback((e) => {
     setAllowDuplicates(e.target.checked);
     const tempWordleyWords = !allowDuplicates
-      ? [...wordleWordsOriginals]
-      : [...filterDuplicates(wordleWordsOriginals)];
+      ? [...wordleOriginals]
+      : [...filterDuplicates(wordleOriginals)];
     setWordleyWords(tempWordleyWords);
   }, [allowDuplicates, filterDuplicates]);
 
@@ -453,9 +500,10 @@ function App() {
   }, []);
 
   const renderRevealWordley = useCallback(() => {
-    const praiseIndex = currentWordley.currentTry === 6
-      ? currentWordley.currentTry
-      : currentWordley.currentTry - 1;
+    // const praiseIndex = currentWordley.currentTry === 6
+    //   ? currentWordley.currentTry
+    //   : currentWordley.currentTry - 1;
+    const praiseIndex = currentWordley.currentTry - 1;
     return (
       <div className='reveal-container'>
       <div className={classNames('praise-window', {'hidden': !dialogCompleteOpen})}>
@@ -470,7 +518,7 @@ function App() {
           </tbody>
         </table>
       </div>
-      <div className={classNames('reveal-wordley', {'hidden': !revealWordley})}>
+      <div className={classNames('reveal-wordley', 'earthquake', {'hidden': !revealWordley})}>
         <ShowWord key='revealWordley' wordley={currentWordley.wordley} validations={[1, 1, 1, 1, 1]} />
       </div>
       </div>
