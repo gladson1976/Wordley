@@ -482,13 +482,13 @@ function App() {
 
   const renderBarchart = useCallback(() => {
     const { gameStats: { guessDistribution } } = currentWordley;
-    const totalPlayed = guessDistribution.reduce((sum, num) => sum + num, 0) - guessDistribution[6];
+    const maxGuesses = _.max(_.take(guessDistribution, guessDistribution.length - 1));
 
     return guessDistribution.map((value, index) => {
       if (index !== 6) {
-        const barHeight = totalPlayed === 0
+        const barHeight = maxGuesses === 0
           ? 0
-          : value / totalPlayed * 5;
+          : value / maxGuesses * 5;
         return (
           <div key={`barContainer${index}`}>
             <div className="bar-chart" key={`barChart${index}`} style={{height: `${barHeight}rem`}}>{value}</div>
