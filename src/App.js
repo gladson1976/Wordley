@@ -576,9 +576,9 @@ function App() {
                         <li className="font-bold">Gameplay</li>
                         <li>Each guess must be a valid five letter word.</li>
                         <li>After each guess, the color of the tiles will change to show how close your guess was to the word.</li>
-                        <li><div className="wordley-help-bit wordley-help-correct">P</div> The letter P is in the word and in the correct spot.</li>
-                        <li><div className="wordley-help-bit wordley-help-maybe">U</div> The letter U is in the word but not in the correct spot.</li>
-                        <li><div className="wordley-help-bit wordley-help-no">T</div> The letter T is not in the word in any spot.</li>
+                        <li className="wordley-help-gap"><div className="wordley-help-bit wordley-help-correct">P</div> The letter P is in the word and in the correct spot.</li>
+                        <li className="wordley-help-gap"><div className="wordley-help-bit wordley-help-maybe">U</div> The letter U is in the word but not in the correct spot.</li>
+                        <li className="wordley-help-gap"><div className="wordley-help-bit wordley-help-no">T</div> The letter T is not in the word in any spot.</li>
                       </ul>
                     </li>
                   </ul>

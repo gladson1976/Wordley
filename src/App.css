@@ -226,6 +226,10 @@ table.wordley-praise {
 	font-weight: var(--WORDLEY-WEIGHT-KEY);
 }
 
+.wordley-help-gap {
+	margin-top: 0.25rem;
+}
+
 .wordley-help-bit {
     display: inline-flex;
     color: var(--WORDLEY-TEXT-COLOR);
