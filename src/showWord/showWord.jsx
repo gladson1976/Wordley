@@ -36,7 +36,8 @@ function ShowWord(props) {
             'wordley-maybe': validations[index] === 2,
             'wordley-no': validations[index] === 3,
             'wordley-error': validations[index] === 4,
-            'earthquake': validations[index] === 4
+            'earthquake': validations[index] === 4,
+            'wordley-hint': validations[index] === 5
         })}>{letter}</div>
     }, [validations]);
 
@@ -45,7 +46,7 @@ function ShowWord(props) {
         return text.map((letter, index) => {
             return showLetter(letter, index);
         });
-    }, [showLetter, wordley]);
+    }, [padWordley, showLetter, wordley]);
 
     return (
         <div className='wordley-word'>

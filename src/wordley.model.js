@@ -6,6 +6,7 @@ const wordleyBoardBit = {
 const wordleyData = {
     currentTry: 0,
     wordley: '',
+    hintCount: 0,
     wordleyBoard: [
       Object.assign({}, wordleyBoardBit),
       Object.assign({}, wordleyBoardBit),
@@ -25,8 +26,10 @@ const wordleyData = {
       maxStreak: 0
     },
     gameSettings: {
-      allowDuplicates: true
+      allowDuplicates: true,
+      allowHints: false,
+      darkMode: true
     }
 };
 
-export default wordleyData;
+export { wordleyData };

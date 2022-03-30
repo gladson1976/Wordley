@@ -6,16 +6,19 @@ import './App.css';
 import './bootstrap.css';
 import './keyboard.css';
 import ShowWord from './showWord/showWord';
-import wordleyModel from './wordley.model';
+import { wordleyData as wordleyModel } from './wordley.model';
 import { wordleOriginals, wordleOriginalsValid } from './wordle-original';
 
 function App() {
   const [allowDuplicates, setAllowDuplicates] = useState(true);
+  const [allowHints, setAllowHints] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const [currentWordley, setCurrentWordley] = useState(wordleyModel);
   const [wordleyWords, setWordleyWords] = useState([]);
-  const [wordleyWordsValid, setWordleyWordsValid] = useState(wordleOriginalsValid);
+  const [wordleyWordsValid] = useState(wordleOriginalsValid);
   const [isWordleyComplete, setIsWordleyComplete] = useState(false);
   const [revealWordley, setRevealWordley] = useState(false);
+  const [hintCount, setHintCount] = useState(0);
   const appTitle = "Wordley";
   const appVersion = "1.0";
 
@@ -24,6 +27,7 @@ function App() {
   const [dialogHelpOpen, setDialogHelpOpen] = useState(false);
   const [dialogCompleteOpen, setDialogCompleteOpen] = useState(false);
 
+  const TOTAL_HINTS_ALLOWED = 1;
   const arrKeys = useMemo(() => [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
     ["#Q", "A", "S", "D", "F", "G", "H", "J", "K", "L"],
@@ -33,11 +37,11 @@ function App() {
 
   const arrPraises = useMemo(() => ['Genius', 'Magnificent', 'Impressive', 'Splendid', 'Great', 'Phew', 'Ouch!'], []);
 
-  const indices = useCallback((c, s) => {
-    return s
-    .split('')
-    .reduce((a, e, i) => e === c ? a.concat(i) : a, []);
-  }, []);
+  // const indices = useCallback((c, s) => {
+  //   return s
+  //   .split('')
+  //   .reduce((a, e, i) => e === c ? a.concat(i) : a, []);
+  // }, []);
 
   const getRandom = useCallback((min, max) => {
     return Math.floor(Math.random()*(max-min+1))+min;
@@ -65,15 +69,38 @@ function App() {
     setRevealWordley(true);
   }, []);
 
+  // const validateDataModel = useCallback((persistData) => {
+  //   const defaultModel = _.cloneDeep(wordleyModel);
+  //   const mergedModel = _.merge(defaultModel, persistData);
+  //   mergedModel.wordleyBoard.map((wordleyWord) => {
+  //     if (wordleyWord.wordley === '') {
+  //       _.set(wordleyWord, 'validations', []);
+  //     }
+  //     return wordleyWord;
+  //   });
+  //   return mergedModel;
+  // }, []);
+
+  const lightsOff = useCallback((lightsOff) => {
+    if (lightsOff) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, []);
+
   const savePersistData = useCallback(() => {
     let tempWordley = _.cloneDeep(currentWordley);
     _.set(tempWordley, 'gameSettings.allowDuplicates', allowDuplicates);
+    _.set(tempWordley, 'gameSettings.allowHints', allowHints);
+    _.set(tempWordley, 'gameSettings.darkMode', darkMode);
+    _.set(tempWordley, 'hintCount', hintCount);
     if (window.AppInventor) {
       window.AppInventor.setWebViewString(JSON.stringify(tempWordley));
     } else {
       localStorage.setItem('wordleyPersist', JSON.stringify(tempWordley));
     }
-  }, [allowDuplicates, currentWordley]);
+  }, [allowDuplicates, allowHints, currentWordley, darkMode, hintCount]);
 
   const loadPersistData = useCallback(() => {
     let persistData
@@ -85,20 +112,30 @@ function App() {
     if (_.isNull(persistData)) {
       persistData = _.cloneDeep(wordleyModel);
     }
+    // persistData = validateDataModel(persistData);
     const tempAllowDuplicates = _.get(persistData, 'gameSettings.allowDuplicates', true);
+    const tempAllowHints = _.get(persistData, 'gameSettings.allowHints', false);
+    const tempDarkMode = _.get(persistData, 'gameSettings.darkMode', false);
+    const tempHintCount = _.get(persistData, 'hintCount', 0);
 
     const currentTry = persistData.currentTry - 1 >= 0 ? persistData.currentTry - 1 : 0;
-    const wordleyValidation = _.get(persistData, `wordleyBoard[${currentTry}].validations`, '');
+    const wordleyValidation = _.get(persistData, `wordleyBoard[${currentTry}].validations`, []);
     const wordleyComplete = wordleyValidation.length > 0
       ? wordleyValidation.reduce((valid, num) => valid && (num === 1), true) || persistData.currentTry > 5
       : false;
     setIsWordleyComplete(wordleyComplete);
     setCurrentWordley(persistData);
     setAllowDuplicates(tempAllowDuplicates);
+    setAllowHints(tempAllowHints);
+    setDarkMode(tempDarkMode);
+    setHintCount(tempHintCount);
+    lightsOff(tempDarkMode);
     if (currentTry === 5 && wordleyComplete) {
       goRevealWordley();
+    } else if (wordleyComplete) {
+      setDialogCompleteOpen(true);
     }
-  }, [goRevealWordley]);
+  }, [goRevealWordley, lightsOff]);
 
   const collectWordleys = useCallback(() => {
     const tempWordleyWords = allowDuplicates
@@ -106,6 +143,34 @@ function App() {
       : [...filterDuplicates(wordleOriginals)];
     setWordleyWords(tempWordleyWords);
   }, [allowDuplicates, filterDuplicates]);
+
+  const goHint = useCallback(() => {
+    const currentWord = currentWordley.wordley
+    const lastTry = currentWordley.currentTry - 1;
+    const currentTry = currentWordley.currentTry;
+    let lastGuess = _.get(currentWordley, `wordleyBoard[${lastTry}].wordley`, '');
+    let availableLetters = [];
+    for (let i = 0; i <= 4; i++) {
+      if (currentWord[i] !== lastGuess[i]) {
+        availableLetters.push(i);
+      }
+    }
+    if (availableLetters.length > 0) {
+      const hintPosition = getRandom(0, availableLetters.length - 1);
+      let arrLastGuess = '     '.split('');
+      let arrValidations = [0, 0, 0, 0, 0];
+      arrLastGuess[availableLetters[hintPosition]] = currentWord[availableLetters[hintPosition]];
+      arrValidations[availableLetters[hintPosition]] = 5;
+      const tempWordley = _.cloneDeep(currentWordley);
+      _.set(tempWordley, `wordleyBoard[${currentTry}].wordley`, arrLastGuess.join(''));
+      _.set(tempWordley, `wordleyBoard[${currentTry}].validations`, arrValidations);
+      setCurrentWordley(tempWordley);
+      setHintCount(hintCount - 1);
+      setTimeout(() => {
+        setCurrentWordley(currentWordley);
+      }, 1000);
+    }
+  }, [currentWordley, getRandom, hintCount]);
 
   const newWordley = useCallback(() => {
     const newWordley = wordleyModel;
@@ -121,7 +186,12 @@ function App() {
     setIsWordleyComplete(false);
     setDialogCompleteOpen(false);
     setRevealWordley(false);
-  }, [currentWordley, getRandom, wordleyWords]);
+    if (allowHints) {
+      setHintCount(TOTAL_HINTS_ALLOWED);
+    } else {
+      setHintCount(0);
+    }
+  }, [allowHints, currentWordley, getRandom, wordleyWords]);
 
   const renderWordleyBoard = useCallback(() => {
     return (
@@ -314,7 +384,7 @@ function App() {
     setDialogSettingsOpen(false);
     setDialogStatsOpen(false);
     setDialogHelpOpen(false);
-    setDialogCompleteOpen(false);
+    // setDialogCompleteOpen(false);
   }, []);
 
   const setOptionDuplicates = useCallback((e) => {
@@ -324,6 +394,15 @@ function App() {
       : [...filterDuplicates(wordleOriginals)];
     setWordleyWords(tempWordleyWords);
   }, [allowDuplicates, filterDuplicates]);
+
+  const setOptionHints = useCallback((e) => {
+    setAllowHints(e.target.checked);
+  }, []);
+
+  const setOptionDarkMode = useCallback((e) => {
+    setDarkMode(e.target.checked);
+    lightsOff(e.target.checked);
+  }, [lightsOff]);
 
   const resetStats = useCallback(() => {
     const newWordley = wordleyModel;
@@ -354,6 +433,7 @@ function App() {
                 <span>{appTitle}</span>
               </td>
               <td className="title text-right">
+                <span className={classNames('material-icons', 'icon icon-hint', 'title-button',' cursor-pointer', {'hidden': hintCount === 0})} onClick={() => goHint()} />
                 <span className="material-icons icon icon-replay title-button cursor-pointer" onClick={() => newWordley()} />
                 <span className="material-icons icon icon-settings title-button cursor-pointer" onClick={() => showSettings()}></span>
                 <span className="material-icons icon icon-bar-chart title-button cursor-pointer" onClick={() => showStats()}></span>
@@ -364,7 +444,7 @@ function App() {
         </table>
       </div>
     )
-  }, [newWordley, showHelp, showSettings, showStats]);
+  }, [goHint, hintCount, newWordley, showHelp, showSettings, showStats]);
 
   const renderWordleySettings = useCallback(() => {
     return (
@@ -381,12 +461,24 @@ function App() {
                   <input type="checkbox" name="duplicates" id="duplicates" value={allowDuplicates} checked={allowDuplicates} onChange={(e) => setOptionDuplicates(e)} />
                 </td>
               </tr>
+              <tr>
+                <td>Allow hints</td>
+                <td className="text-right va-middle">
+                  <input type="checkbox" name="hints" id="hints" value={allowHints} checked={allowHints} onChange={(e) => setOptionHints(e)} />
+                </td>
+              </tr>
+              <tr>
+                <td>Dark mode</td>
+                <td className="text-right va-middle">
+                  <input type="checkbox" name="darkmode" id="darkmode" value={darkMode} checked={darkMode} onChange={(e) => setOptionDarkMode(e)} />
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
     );
-  }, [allowDuplicates, setOptionDuplicates]);
+  }, [allowDuplicates, allowHints, darkMode, setOptionDuplicates, setOptionHints, setOptionDarkMode]);
 
   const renderBarchart = useCallback(() => {
     const { gameStats: { guessDistribution } } = currentWordley;
@@ -500,27 +592,24 @@ function App() {
   }, []);
 
   const renderRevealWordley = useCallback(() => {
-    // const praiseIndex = currentWordley.currentTry === 6
-    //   ? currentWordley.currentTry
-    //   : currentWordley.currentTry - 1;
     const praiseIndex = currentWordley.currentTry - 1;
     return (
       <div className='reveal-container'>
-      <div className={classNames('praise-window', {'hidden': !dialogCompleteOpen})}>
-        <table className='wordley-praise'>
-          <tbody>
-            <tr>
-              <td className='title text-center praise-border'>{arrPraises[praiseIndex]}</td>
-              <td className='text-center'>
-                <button type='button' className='btn btn-outline-success praise-button' onClick={(e) => newWordley(e)}>New Wordley</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div className={classNames('reveal-wordley', 'earthquake', {'hidden': !revealWordley})}>
-        <ShowWord key='revealWordley' wordley={currentWordley.wordley} validations={[1, 1, 1, 1, 1]} />
-      </div>
+        <div className={classNames('praise-window', {'hidden': !dialogCompleteOpen})}>
+          <table className='wordley-praise'>
+            <tbody>
+              <tr>
+                <td className='title text-center praise-border'>{arrPraises[praiseIndex]}</td>
+                <td className='text-center'>
+                  <button type='button' className='btn btn-outline-success praise-button' onClick={(e) => newWordley(e)}>New Wordley</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className={classNames('reveal-wordley', 'earthquake', {'hidden': !revealWordley})}>
+          <ShowWord key='revealWordley' wordley={currentWordley.wordley} validations={[1, 1, 1, 1, 1]} />
+        </div>
       </div>
     )
   }, [arrPraises, currentWordley.currentTry, currentWordley.wordley, dialogCompleteOpen, newWordley, revealWordley]);

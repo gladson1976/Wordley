@@ -1,6 +1,6 @@
 .keyboard-container {
 	display: block;
-	border: 0px solid black;
+	border: 0px solid var(--WORDLEY-BG-COLOR);
 	width: 100%;
 	height: fit-content;
 	padding: 0px;
@@ -10,7 +10,7 @@
 .keyboard {
 	display: flex;
     flex-direction: column;
-	border: 0px solid black;
+	border: 0px solid var(--WORDLEY-BG-COLOR);
 	width: 100%;
 	height: fit-content;
 	padding: 0px;
@@ -27,18 +27,18 @@
 	display: flex;
     justify-content: center;
     align-items: center;
-	border: 1px solid #b3b6ba;
-	color: #555555;
-	background-color: #f1f1f1;
+	color: var(--WORDLEY-TEXT-COLOR);
+	background-color: var(--WORDLEY-BG-KEY);
+    border: 1px solid var(--WORDLEY-BG-KEY);
 	text-align: center;
 	vertical-align: middle;
 	border-radius: 0.25rem;
 	cursor: pointer;
 	width: 1.875rem;
-	height: 2.5rem;
+	height: 3rem;
 	font-size: 1.125rem;
-	font-weight: bold;
-	margin: 0 1px;
+	font-weight: var(--WORDLEY-WEIGHT-KEY);
+	margin: 0 3px;
 }
 .space-key {
 	width: 60%;
@@ -49,9 +49,10 @@
 }
 .delete-key {
 	width: 2.75rem;
+	font-size: 1.5rem;
 }
 .delete-key:before {
-	content: '\e14a';
+	content: '\e317';
 }
 .enter-key {
 	width: 3.125rem;
