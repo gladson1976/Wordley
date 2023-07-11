@@ -2,6 +2,7 @@ import { useEffect, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { Dialog } from '@mui/material';
 import _ from 'lodash';
+import { DateTime } from 'luxon';
 import './App.css';
 import './bootstrap.css';
 import './keyboard.css';
@@ -198,15 +199,28 @@ function App() {
     }
   }, [allowHints, currentWordley, getRandom, wordleyWords]);
 
-  const getWordleyShare = useCallback((wordleyBoard) => {
-    return _.compact(_.map(wordleyBoard, (word) => {
+  const getWordleyResult = useCallback((wordleyBoard, dateFormat) => {
+    const wordleyResult = _.compact(_.map(wordleyBoard, (word) => {
       return word.validations.length > 0
         ? _.map(word.validations, (letter) => {
           return wordleyShare[letter - 1];
         }).join('')
       : undefined;
     })).join('\n')
+
+    return dateFormat !== ''
+      ? `Wordley\n${DateTime.now().toFormat(dateFormat)}\n\n${wordleyResult}`
+      : `Wordley\n\n${wordleyResult}`;
   }, [wordleyShare]);
+
+  const setShareWordley = useCallback((wordleyBoard, dateFormat = 'dd-mm-yyyy hh:mm:ss a') => {
+    const shareWordley = getWordleyResult(wordleyBoard, dateFormat);
+    if (window.AppInventor) {
+      window.AppInventor.setWebViewString(`COPY::${shareWordley}`);
+    } else {
+      handleCopyText(shareWordley);
+    }
+  }, [getWordleyResult, handleCopyText]);
 
   const renderWordleyBoard = useCallback(() => {
     return (
@@ -323,28 +337,18 @@ function App() {
       }
       setDialogCompleteOpen(true);
 
-      const shareWordley = `Wordley\n${new Date().toLocaleString('en-GB', { hour12: true })}\n\n${getWordleyShare(tempWordley.wordleyBoard)}`;
-      if (window.AppInventor) {
-        window.AppInventor.setWebViewString(`COPY::${shareWordley}`);
-      } else {
-        handleCopyText(shareWordley);
-      }
+      setShareWordley(tempWordley.wordleyBoard, 'dd-mm-yyyy hh:mm:ss a');
     } else if (currentTry === 5 && !wordleyComplete) {
       const guessDistribution = _.get(tempWordley, `gameStats.guessDistribution[6]`, 0) + 1;
       _.set(tempWordley, 'gameStats.guessDistribution[6]', guessDistribution);
       _.set(tempWordley, 'gameStats.currentStreak', 0);
       goRevealWordley();
 
-      const shareWordley = `Wordley\n${new Date().toLocaleString('en-GB', { hour12: true })}\n\n${getWordleyShare(tempWordley.wordleyBoard)}`;
-      if (window.AppInventor) {
-        window.AppInventor.setWebViewString(`COPY::${shareWordley}`);
-      } else {
-        handleCopyText(shareWordley);
-      }
+      setShareWordley(tempWordley.wordleyBoard, 'dd-mm-yyyy hh:mm:ss a');
     }
 
     setCurrentWordley(tempWordley);
-  }, [currentWordley, isValidWord, doValidate, handleCopyText, getWordleyShare, getRandom, wordleyWords, goRevealWordley]);
+  }, [currentWordley, isValidWord, doValidate, getRandom, wordleyWords, setShareWordley, goRevealWordley]);
 
   const goWordley = useCallback((keyLetter) => {
     let tempWordley = _.cloneDeep(currentWordley);
@@ -453,6 +457,8 @@ function App() {
   }, []);
 
   const renderWordleyHeader = useCallback(() => {
+    console.log(isWordleyComplete, _.get(currentWordley, 'wordleyBoard', []));
+    const tempBoard = _.get(currentWordley, 'wordleyBoard', []);
     return (
       <div className="wordley-title title-border">
         <table className="wordley-title">
@@ -462,6 +468,7 @@ function App() {
                 <span>{appTitle}</span>
               </td>
               <td className="title text-right">
+                <span className={classNames('material-icons', 'icon icon-share', 'title-button',' cursor-pointer', {'hidden': !(isWordleyComplete || (!isWordleyComplete && _.last(tempBoard).validations.length === 5)) })} onClick={() => setShareWordley(_.get(currentWordley, 'wordleyBoard', []))} />
                 <span className={classNames('material-icons', 'icon icon-hint', 'title-button',' cursor-pointer', {'hidden': hintCount === 0})} onClick={() => goHint()} />
                 <span className="material-icons icon icon-replay title-button cursor-pointer" onClick={() => newWordley()} />
                 <span className="material-icons icon icon-settings title-button cursor-pointer" onClick={() => showSettings()}></span>
@@ -473,7 +480,7 @@ function App() {
         </table>
       </div>
     )
-  }, [goHint, hintCount, newWordley, showHelp, showSettings, showStats]);
+  }, [currentWordley, goHint, hintCount, isWordleyComplete, newWordley, setShareWordley, showHelp, showSettings, showStats]);
 
   const renderWordleySettings = useCallback(() => {
     return (
@@ -690,11 +697,15 @@ function App() {
   return (
     <>
       {renderWordleyHeader()}
-      <div key='wordley-container' className="wordley-container">
-        {renderWordleyBoard()}
+      <div className="wordley-grid">
+        <div key='wordley-container' className="wordley-container">
+          {renderWordleyBoard()}
+        </div>
+        <div>
+          {renderRevealWordley()}
+          {renderKeyboard()}
+        </div>
       </div>
-      {renderRevealWordley()}
-      {renderKeyboard()}
       <Dialog id="dialogSettings" onClose={handleDialogClose} open={dialogSettingsOpen}>
         {renderWordleySettings()}
       </Dialog>

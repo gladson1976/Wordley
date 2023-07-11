@@ -74,6 +74,11 @@ body, .wordley-wrapper {
 	font-feature-settings: 'liga';
 }
 
+.wordley-grid {
+	display: grid;
+	grid-template-rows: auto auto;
+}
+
 .wordley-container {
 	display: flex;
 	flex-direction: column;
@@ -112,6 +117,9 @@ body, .wordley-wrapper {
 }
 .icon-question:before {
 	content: '\e8fd';
+}
+.icon-share:before {
+	content: '\e80d';
 }
 .text-right {
 	text-align: right;
