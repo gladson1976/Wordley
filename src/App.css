@@ -12,6 +12,10 @@
 	--WORDLEY-BG-KEY: #a1a1a1;
 	--WORDLEY-TEXT-KEY: #000000;
 	--WORDLEY-WEIGHT-KEY: 600;
+
+	--WORDLEY-SHARE-YES: 🟩;
+	--WORDLEY-SHARE-MAYBE: 🟨;
+	--WORDLEY-SHARE-NO: ⬜;
 }
 
 @font-face {

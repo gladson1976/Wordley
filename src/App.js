@@ -20,7 +20,7 @@ function App() {
   const [revealWordley, setRevealWordley] = useState(false);
   const [hintCount, setHintCount] = useState(0);
   const appTitle = "Wordley";
-  const appVersion = "1.2";
+  const appVersion = "1.3";
 
   const [dialogSettingsOpen, setDialogSettingsOpen] = useState(false);
   const [dialogStatsOpen, setDialogStatsOpen] = useState(false);
@@ -34,6 +34,7 @@ function App() {
     ["*BKSPC", "Z", "X", "C", "V", "B", "N", "M", "*ENTER"],
     // ["#H", "#H", "#H", "#H", "*SPACE", "#H", "#H"]
   ], []);
+  const wordleyShare = useMemo(() => ['🟩', '🟨', '⬜'], []);
 
   const arrPraises = useMemo(() => ['Genius', 'Magnificent', 'Impressive', 'Splendid', 'Great', 'Phew', 'Ouch!'], []);
 
@@ -62,6 +63,10 @@ function App() {
       return undefined;
     }));
   }, [hasDuplicates]);
+
+  const handleCopyText = useCallback((textToCopy) => {
+    navigator.clipboard.writeText(textToCopy);
+  }, [])
 
   // ----------------------------
 
@@ -193,6 +198,16 @@ function App() {
     }
   }, [allowHints, currentWordley, getRandom, wordleyWords]);
 
+  const getWordleyShare = useCallback((wordleyBoard) => {
+    return _.compact(_.map(wordleyBoard, (word) => {
+      return word.validations.length > 0
+        ? _.map(word.validations, (letter) => {
+          return wordleyShare[letter - 1];
+        }).join('')
+      : undefined;
+    })).join('\n')
+  }, [wordleyShare]);
+
   const renderWordleyBoard = useCallback(() => {
     return (
       _.map(currentWordley.wordleyBoard, (word, index) => {
@@ -307,15 +322,29 @@ function App() {
         _.set(tempWordley, 'gameStats.maxStreak', currentStreak);
       }
       setDialogCompleteOpen(true);
+
+      const shareWordley = `Wordley\n${new Date().toLocaleString('en-GB', { hour12: true })}\n\n${getWordleyShare(tempWordley.wordleyBoard)}`;
+      if (window.AppInventor) {
+        window.AppInventor.setWebViewString(`COPY::${shareWordley}`);
+      } else {
+        handleCopyText(shareWordley);
+      }
     } else if (currentTry === 5 && !wordleyComplete) {
       const guessDistribution = _.get(tempWordley, `gameStats.guessDistribution[6]`, 0) + 1;
       _.set(tempWordley, 'gameStats.guessDistribution[6]', guessDistribution);
       _.set(tempWordley, 'gameStats.currentStreak', 0);
       goRevealWordley();
+
+      const shareWordley = `Wordley\n${new Date().toLocaleString('en-GB', { hour12: true })}\n\n${getWordleyShare(tempWordley.wordleyBoard)}`;
+      if (window.AppInventor) {
+        window.AppInventor.setWebViewString(`COPY::${shareWordley}`);
+      } else {
+        handleCopyText(shareWordley);
+      }
     }
 
     setCurrentWordley(tempWordley);
-  }, [currentWordley, isValidWord, doValidate, getRandom, wordleyWords, goRevealWordley]);
+  }, [currentWordley, isValidWord, doValidate, handleCopyText, getWordleyShare, getRandom, wordleyWords, goRevealWordley]);
 
   const goWordley = useCallback((keyLetter) => {
     let tempWordley = _.cloneDeep(currentWordley);
