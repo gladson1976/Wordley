@@ -4,6 +4,7 @@ const wordleyBoardBit = {
 };
 
 const wordleyData = {
+    lastComplete: undefined,
     currentTry: 0,
     wordley: '',
     hintCount: 0,

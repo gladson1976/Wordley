@@ -2,7 +2,6 @@ import { useEffect, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { Dialog } from '@mui/material';
 import _ from 'lodash';
-import { DateTime } from 'luxon';
 import './App.css';
 import './bootstrap.css';
 import './keyboard.css';
@@ -199,8 +198,10 @@ function App() {
     }
   }, [allowHints, currentWordley, getRandom, wordleyWords]);
 
-  const getWordleyResult = useCallback((wordleyBoard, dateFormat) => {
-    const wordleyResult = _.compact(_.map(wordleyBoard, (word) => {
+  // Generate a formatted string with Wordley emojis for sharing..
+  const getWordleyResult = useCallback((tempWordley) => {
+    const lastComplete = new Date(_.get(tempWordley, "lastComplete", Date.now()));
+    const wordleyResult = _.compact(_.map(_.get(tempWordley, 'wordleyBoard', []), (word) => {
       return word.validations.length > 0
         ? _.map(word.validations, (letter) => {
           return wordleyShare[letter - 1];
@@ -208,13 +209,12 @@ function App() {
       : undefined;
     })).join('\n')
 
-    return dateFormat !== ''
-      ? `Wordley\n${DateTime.now().toFormat(dateFormat)}\n\n${wordleyResult}`
-      : `Wordley\n\n${wordleyResult}`;
+    return `Wordley\n${lastComplete.toLocaleString(undefined, {dateStyle: 'medium', timeStyle: 'medium'})}\n\n${wordleyResult}`;
   }, [wordleyShare]);
 
-  const setShareWordley = useCallback((wordleyBoard, dateFormat = 'dd-mm-yyyy hh:mm:ss a') => {
-    const shareWordley = getWordleyResult(wordleyBoard, dateFormat);
+  // Set the formatted share string in clipboard for desktops or in the WebViewString for Appinventor..
+  const setShareWordley = useCallback((tempWordley) => {
+    const shareWordley = getWordleyResult(tempWordley);
     if (window.AppInventor) {
       window.AppInventor.setWebViewString(`COPY::${shareWordley}`);
     } else {
@@ -337,14 +337,16 @@ function App() {
       }
       setDialogCompleteOpen(true);
 
-      setShareWordley(tempWordley.wordleyBoard, 'dd-mm-yyyy hh:mm:ss a');
+      setShareWordley(tempWordley, 'dd-mm-yyyy hh:mm:ss a');
+      _.set(tempWordley, 'lastComplete', Date.now());
     } else if (currentTry === 5 && !wordleyComplete) {
       const guessDistribution = _.get(tempWordley, `gameStats.guessDistribution[6]`, 0) + 1;
       _.set(tempWordley, 'gameStats.guessDistribution[6]', guessDistribution);
       _.set(tempWordley, 'gameStats.currentStreak', 0);
       goRevealWordley();
 
-      setShareWordley(tempWordley.wordleyBoard, 'dd-mm-yyyy hh:mm:ss a');
+      setShareWordley(tempWordley, 'dd-mm-yyyy hh:mm:ss a');
+      _.set(tempWordley, 'lastComplete', Date.now());
     }
 
     setCurrentWordley(tempWordley);
@@ -457,7 +459,6 @@ function App() {
   }, []);
 
   const renderWordleyHeader = useCallback(() => {
-    console.log(isWordleyComplete, _.get(currentWordley, 'wordleyBoard', []));
     const tempBoard = _.get(currentWordley, 'wordleyBoard', []);
     return (
       <div className="wordley-title title-border">
@@ -468,7 +469,8 @@ function App() {
                 <span>{appTitle}</span>
               </td>
               <td className="title text-right">
-                <span className={classNames('material-icons', 'icon icon-share', 'title-button',' cursor-pointer', {'hidden': !(isWordleyComplete || (!isWordleyComplete && _.last(tempBoard).validations.length === 5)) })} onClick={() => setShareWordley(_.get(currentWordley, 'wordleyBoard', []))} />
+                <span className={classNames('material-icons', 'icon icon-share', 'title-button',' cursor-pointer',
+                  {'hidden': !(isWordleyComplete || (!isWordleyComplete && _.last(tempBoard).validations.length === 5)) })} onClick={() => setShareWordley(currentWordley)} />
                 <span className={classNames('material-icons', 'icon icon-hint', 'title-button',' cursor-pointer', {'hidden': hintCount === 0})} onClick={() => goHint()} />
                 <span className="material-icons icon icon-replay title-button cursor-pointer" onClick={() => newWordley()} />
                 <span className="material-icons icon icon-settings title-button cursor-pointer" onClick={() => showSettings()}></span>
