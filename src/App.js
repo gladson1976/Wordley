@@ -349,7 +349,7 @@ function App() {
       }
       setDialogCompleteOpen(true);
 
-      setShareWordley(tempWordley, 'dd-mm-yyyy hh:mm:ss a');
+      // setShareWordley(tempWordley, 'dd-mm-yyyy hh:mm:ss a');
       _.set(tempWordley, 'lastComplete', Date.now());
     } else if (currentTry === 5 && !wordleyComplete) {
       const guessDistribution = _.get(tempWordley, `gameStats.guessDistribution[6]`, 0) + 1;
@@ -357,7 +357,7 @@ function App() {
       _.set(tempWordley, 'gameStats.currentStreak', 0);
       goRevealWordley();
 
-      setShareWordley(tempWordley, 'dd-mm-yyyy hh:mm:ss a');
+      // setShareWordley(tempWordley, 'dd-mm-yyyy hh:mm:ss a');
       _.set(tempWordley, 'lastComplete', Date.now());
     }
 
