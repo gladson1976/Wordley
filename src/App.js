@@ -28,26 +28,25 @@ function App() {
   const [dialogCompleteOpen, setDialogCompleteOpen] = useState(false);
 
   const TOTAL_HINTS_ALLOWED = 1;
+  // Keyboard keys array..
   const arrKeys = useMemo(() => [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
     ["#Q", "A", "S", "D", "F", "G", "H", "J", "K", "L"],
     ["*BKSPC", "Z", "X", "C", "V", "B", "N", "M", "*ENTER"],
     // ["#H", "#H", "#H", "#H", "*SPACE", "#H", "#H"]
   ], []);
+  // Emojis for sharing Wordley result..
   const wordleyShare = useMemo(() => ['🟩', '🟨', '⬜'], []);
 
   const arrPraises = useMemo(() => ['Genius', 'Magnificent', 'Impressive', 'Splendid', 'Great', 'Phew', 'Ouch!'], []);
 
-  // const indices = useCallback((c, s) => {
-  //   return s
-  //   .split('')
-  //   .reduce((a, e, i) => e === c ? a.concat(i) : a, []);
-  // }, []);
-
+  // Utility methods..
+  // Get a random number between the range provided..
   const getRandom = useCallback((min, max) => {
     return Math.floor(Math.random()*(max-min+1))+min;
   }, []);
 
+  // Check if a work has duplicate letters.. (repeated letters)..
   const hasDuplicates = useCallback((word) => {
     const text = word.split('');
     return text.some((v, i, a) => {
@@ -55,6 +54,7 @@ function App() {
     });
   }, []);
 
+  // Filter duplicate letters from the list..
   const filterDuplicates = useCallback(() => {
     return _.compact(wordleOriginals.map((word) => {
       if (!hasDuplicates(word)) {
@@ -64,12 +64,14 @@ function App() {
     }));
   }, [hasDuplicates]);
 
+  // Copy the text to the clipboard..
   const handleCopyText = useCallback((textToCopy) => {
     navigator.clipboard.writeText(textToCopy);
   }, [])
 
   // ----------------------------
 
+  // Reveal Wordley..
   const goRevealWordley = useCallback(() => {
     setRevealWordley(true);
   }, []);
@@ -86,6 +88,7 @@ function App() {
   //   return mergedModel;
   // }, []);
 
+  // Check and enable/disable dark mode..
   const lightsOff = useCallback((lightsOff) => {
     if (lightsOff) {
       document.body.classList.add('dark-mode');
@@ -94,6 +97,7 @@ function App() {
     }
   }, []);
 
+  // Save data to the browser localStorage for desktop or set it in the webViewString for mobile..
   const savePersistData = useCallback(() => {
     let tempWordley = _.cloneDeep(currentWordley);
     _.set(tempWordley, 'gameSettings.allowDuplicates', allowDuplicates);
@@ -107,6 +111,7 @@ function App() {
     }
   }, [allowDuplicates, allowHints, currentWordley, darkMode, hintCount]);
 
+  // Load saved data from the localStorage for desktop or from the webViewString for mobile..
   const loadPersistData = useCallback(() => {
     let persistData
     if (window.AppInventor) {
@@ -142,6 +147,7 @@ function App() {
     }
   }, [goRevealWordley, lightsOff]);
 
+  // Get Wordley list.. remove duplicates (if option is selected)..
   const collectWordleys = useCallback(() => {
     const tempWordleyWords = allowDuplicates
       ? [...wordleOriginals]
@@ -149,6 +155,7 @@ function App() {
     setWordleyWords(tempWordleyWords);
   }, [allowDuplicates, filterDuplicates]);
 
+  // Show the hint in a random non green slot..
   const goHint = useCallback(() => {
     const currentWord = currentWordley.wordley
     const lastTry = currentWordley.currentTry - 1;
@@ -177,6 +184,7 @@ function App() {
     }
   }, [currentWordley, getRandom, hintCount]);
 
+  // Get a new Wordley from the list for a new game.. initialize all variables..
   const newWordley = useCallback(() => {
     const newWordley = wordleyModel;
     const tempWordley = _.cloneDeep(currentWordley);
@@ -230,6 +238,7 @@ function App() {
     );
   }, [currentWordley.wordleyBoard]);
 
+  // Backspace functionality on the custom keyboard..
   const goBackspace = useCallback(() => {
     let tempWordley = _.cloneDeep(currentWordley);
     const currentTry = tempWordley.currentTry;
@@ -240,10 +249,12 @@ function App() {
     setCurrentWordley(tempWordley);
   }, [currentWordley]);
 
+  // Check if the user guess is a valid word in the Wordley list..
   const isValidWord = useCallback((word) => {
     return wordleyWords.includes(word) || wordleyWordsValid.includes(word);
   }, [wordleyWords, wordleyWordsValid]);
 
+  // Validate the user guess with the selected word and identify the correct / incorrect position / wrong letters.. the actual validation of the Wordley happens here..
   const doValidate = useCallback((guess, solution, tempWordley) => {
     let { usedLetters } = tempWordley;
     const guessedLetters = guess
@@ -295,6 +306,7 @@ function App() {
     };
   }, []);
 
+  // Validate the user guess and set the corresponding values based on the validation.. calls doValidate method to do the actual word validation..
   const validateWordley = useCallback(() => {
     let tempWordley = _.cloneDeep(currentWordley);
     if (tempWordley.wordley === '') {
@@ -352,6 +364,7 @@ function App() {
     setCurrentWordley(tempWordley);
   }, [currentWordley, isValidWord, doValidate, getRandom, wordleyWords, setShareWordley, goRevealWordley]);
 
+  // Process the keys pressed by the user (backspace, enter, space, letters) and take appropriate action..
   const goWordley = useCallback((keyLetter) => {
     let tempWordley = _.cloneDeep(currentWordley);
     if (tempWordley.currentTry > 5) {
@@ -381,6 +394,7 @@ function App() {
     }
   }, [currentWordley, goBackspace, newWordley, validateWordley]);
 
+  // Mapping for the keypress and the keyboard layout..
   const getKeyLetter = useCallback((_key) => {
     return _key === '*BKSPC' || _key === '*MENU' || _key === '*ENTER'
       ? ''
@@ -393,6 +407,7 @@ function App() {
             : _key)));
   }, []);
 
+  // Mapping for the keypress and the keyboard layout..
   const getKeyChar = useCallback((row, keyNum) => {
 		var keyChar = arrKeys[row][keyNum];
     if (isWordleyComplete && keyChar !== "*SPACE") {
@@ -415,6 +430,7 @@ function App() {
     goWordley(keyChar);
 	}, [arrKeys, goWordley, isWordleyComplete]);
 
+  // Close all open dialogs..
   const handleDialogClose = useCallback(() => {
     setDialogSettingsOpen(false);
     setDialogStatsOpen(false);
@@ -422,6 +438,7 @@ function App() {
     // setDialogCompleteOpen(false);
   }, []);
 
+  // Set/unset the allow duplicates option when it is selected in the Options dialog..
   const setOptionDuplicates = useCallback((e) => {
     setAllowDuplicates(e.target.checked);
     const tempWordleyWords = !allowDuplicates
@@ -430,15 +447,18 @@ function App() {
     setWordleyWords(tempWordleyWords);
   }, [allowDuplicates, filterDuplicates]);
 
+  // Set/unset the allow hints option when it is selected in the Options dialog..
   const setOptionHints = useCallback((e) => {
     setAllowHints(e.target.checked);
   }, []);
 
+  // Set/unset the allow dark mode option when it is selected in the Options dialog..
   const setOptionDarkMode = useCallback((e) => {
     setDarkMode(e.target.checked);
     lightsOff(e.target.checked);
   }, [lightsOff]);
 
+  // Reset the stats.. no warnings..
   const resetStats = useCallback(() => {
     const newWordley = wordleyModel;
     const tempWordley = _.cloneDeep(currentWordley);
@@ -446,18 +466,22 @@ function App() {
     setCurrentWordley(tempWordley);
   }, [currentWordley]);
 
+  // Show the Settings dialog..
   const showSettings = useCallback(() => {
     setDialogSettingsOpen(true);
   }, []);
 
+  // Show the Stats dialog..
   const showStats = useCallback(() => {
     setDialogStatsOpen(true);
   }, []);
 
+  // Show the Help dialog..
   const showHelp = useCallback(() => {
     setDialogHelpOpen(true);
   }, []);
 
+  // Render the Wordley header - title, icons..
   const renderWordleyHeader = useCallback(() => {
     const tempBoard = _.get(currentWordley, 'wordleyBoard', []);
     return (
@@ -484,6 +508,7 @@ function App() {
     )
   }, [currentWordley, goHint, hintCount, isWordleyComplete, newWordley, setShareWordley, showHelp, showSettings, showStats]);
 
+  // Render the Settings dialog screen..
   const renderWordleySettings = useCallback(() => {
     return (
       <div className="settings">
@@ -518,6 +543,7 @@ function App() {
     );
   }, [allowDuplicates, allowHints, darkMode, setOptionDuplicates, setOptionHints, setOptionDarkMode]);
 
+  // Render the bar chart in the Stats dialog screen..
   const renderBarchart = useCallback(() => {
     const { gameStats: { guessDistribution } } = currentWordley;
     const maxGuesses = _.max(_.take(guessDistribution, guessDistribution.length - 1));
@@ -538,6 +564,7 @@ function App() {
     });
   }, [currentWordley]);
 
+  // Render the Stats dialog screen..
   const renderWordleyStats = useCallback(() => {
     const { gameStats } = currentWordley;
     const totalPlayed = gameStats.guessDistribution.reduce((sum, num) => sum + num, 0);
@@ -588,6 +615,7 @@ function App() {
     );
   }, [currentWordley, renderBarchart, resetStats]);
 
+  // Render the Help dialog screen..
   const renderWordleyHelp = useCallback(() => {
     return (
       <div className="settings">
@@ -629,6 +657,7 @@ function App() {
     );
   }, []);
 
+  // Render the reveal Wordley.. below the guesses..
   const renderRevealWordley = useCallback(() => {
     const praiseIndex = currentWordley.currentTry - 1;
     return (
@@ -652,6 +681,7 @@ function App() {
     )
   }, [arrPraises, currentWordley.currentTry, currentWordley.wordley, dialogCompleteOpen, newWordley, revealWordley]);
 
+  // Render the Wordley keyboard..
   const renderKeyboard = useCallback(() => {
     return (
       <div key='keyboard-container' className="keyboard-container">
@@ -692,10 +722,12 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Save the Wordley data everytime the data changes.. (everytime a word is guessed, validations, ..)..
   useEffect(() => {
     savePersistData();
   }, [currentWordley, savePersistData]);
 
+  // Render the whole Wordley board :) ..
   return (
     <>
       {renderWordleyHeader()}
