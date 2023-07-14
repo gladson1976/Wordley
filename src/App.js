@@ -20,7 +20,7 @@ function App() {
   const [revealWordley, setRevealWordley] = useState(false);
   const [hintCount, setHintCount] = useState(0);
   const appTitle = "Wordley";
-  const appVersion = "1.3";
+  const appVersion = "1.4";
 
   const [dialogSettingsOpen, setDialogSettingsOpen] = useState(false);
   const [dialogStatsOpen, setDialogStatsOpen] = useState(false);
